@@ -44,7 +44,29 @@ const consultationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    clinicalHistorySummary: {
+  type: mongoose.Schema.Types.Mixed,
+  default: null,
+},
+
+confirmedBy: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "User",
+  default: null,
+},
+
+confirmedAt: {
+  type: Date,
+  default: null,
+},
+
+locked: {
+  type: Boolean,
+  default: false,
+},
   },
+
+
   {
     timestamps: true,
   }
