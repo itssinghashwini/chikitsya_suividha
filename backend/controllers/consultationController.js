@@ -88,7 +88,143 @@ const createConsultation = async (req, res) => {
     });
   }
 };
+const updateConsultation = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const consultation = await Consultation.findById(id);
+
+    if (!consultation) {
+      return res.status(404).json({
+        status: "error",
+        message: "Consultation not found",
+      });
+    }
+
+    // Do not allow editing after confirmation
+    if (consultation.locked) {
+      return res.status(400).json({
+        status: "error",
+        message: "Consultation is locked and cannot be edited",
+      });
+    }
+
+    const {
+      chiefComplaint,
+      prakriti,
+      clinicalHistorySummary,
+      attentionRequired,
+    } = req.body;
+
+    if (chiefComplaint !== undefined) {
+      consultation.chiefComplaint = chiefComplaint;
+    }
+
+    if (prakriti !== undefined) {
+      consultation.prakriti = prakriti;
+    }
+
+    if (clinicalHistorySummary !== undefined) {
+      consultation.clinicalHistorySummary =
+        clinicalHistorySummary;
+    }
+
+    if (attentionRequired !== undefined) {
+      consultation.attentionRequired =
+        attentionRequired;
+    }
+
+    await consultation.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Consultation updated successfully",
+      consultation,
+    });
+  } catch (error) {
+    console.error(
+      "Update consultation error:",
+      error.message
+    );
+
+    res.status(500).json({
+      status: "error",
+      message: "Failed to update consultation",
+    });
+  }
+};
+const confirmConsultation = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const consultation = await Consultation.findById(id);
+
+    if (!consultation) {
+      return res.status(404).json({
+        status: "error",
+        message: "Consultation not found",
+      });
+    }
+
+    // Prevent confirming an already locked consultation
+    if (consultation.locked) {
+      return res.status(400).json({
+        status: "error",
+        message: "Consultation is already confirmed and locked",
+      });
+    }
+
+    // AI summary must exist before confirmation
+    if (!consultation.clinicalHistorySummary) {
+      return res.status(400).json({
+        status: "error",
+        message: "Clinical history summary is not available",
+      });
+    }
+
+    // Lock the consultation
+    consultation.locked = true;
+
+    // Mark as ready for physician consultation
+    consultation.status = "ready";
+
+    // Record who confirmed it
+    consultation.confirmedBy = req.user.id;
+
+    // Record confirmation time
+    consultation.confirmedAt = new Date();
+
+    await consultation.save();
+
+    const confirmedConsultation =
+      await consultation.populate([
+        {
+          path: "patient",
+          select: "patientId name",
+        },
+        {
+          path: "confirmedBy",
+          select: "name email role",
+        },
+      ]);
+
+    res.status(200).json({
+      status: "success",
+      message:
+        "Consultation confirmed and locked successfully",
+      consultation: confirmedConsultation,
+    });
+  } catch (error) {
+  console.error("Confirm consultation error:", error);
+
+  res.status(500).json({
+    status: "error",
+    message: error.message,
+  });
+}}
 module.exports = {
   createConsultation,
   getTodayQueue,
+  updateConsultation,
+  confirmConsultation,
 };
