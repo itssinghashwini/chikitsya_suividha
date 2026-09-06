@@ -28,7 +28,7 @@ const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: role || "practitioner",
+      role: "practitioner",
     });
 
     res.status(201).json({
@@ -68,7 +68,12 @@ const login = async (req, res) => {
         message: "Invalid email or password",
       });
     }
-
+    if (!user.isActive) {
+  return res.status(403).json({
+    status: "error",
+    message: "User account is deactivated",
+  });
+}
     const isPasswordCorrect = await bcrypt.compare(
       password,
       user.password

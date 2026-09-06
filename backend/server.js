@@ -4,6 +4,11 @@ const authRoutes = require("./routes/authRoutes");
 const patientRoutes = require("./routes/patientRoutes");
 const consultationRoutes = require("./routes/consultationRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const sessionRoutes = require("./routes/sessionRoutes");
+const documentRoutes = require("./routes/documentRoutes");
+const reminderRoutes = require("./routes/reminderRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+
 require("dotenv").config();
 const connectDB = require("./config/db");
 const app=express();
@@ -17,7 +22,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/patients", patientRoutes);
 app.use("/api/consultations",consultationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-console.log("Dashboard routes loaded");
+app.use("/api/sessions", sessionRoutes);
+app.use("/api/sessions", documentRoutes);
+app.use("/api/reminders", reminderRoutes);
+app.use("/api/admin", adminRoutes);
+
 //health check
 app.get("/api/health",(req,res) => {
     res.status(200).json({

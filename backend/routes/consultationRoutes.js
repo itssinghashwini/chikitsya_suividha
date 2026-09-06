@@ -3,27 +3,24 @@ const express = require("express");
 const {
   createConsultation,
   getTodayQueue,
+  updateConsultation,
+  confirmConsultation,
 } = require("../controllers/consultationController");
 
-const {
-  protect,
-  allowRoles,
-} = require("../middleware/authMiddleware");
+const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.post(
-  "/",
-  protect,
-  allowRoles("practitioner", "admin"),
-  createConsultation
-);
+router.get("/queue", protect, getTodayQueue);
 
-router.get(
-  "/queue",
+router.post("/", protect, createConsultation);
+
+router.patch("/:id", protect, updateConsultation);
+
+router.post(
+  "/:id/confirm",
   protect,
-  allowRoles("practitioner", "admin"),
-  getTodayQueue
+  confirmConsultation
 );
 
 module.exports = router;
