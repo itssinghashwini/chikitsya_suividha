@@ -1,5 +1,5 @@
 const Consultation = require("../models/Consultation");
-
+const Reminder = require("../models/Reminder");
 const getTodayQueue = async (req, res) => {
   try {
     const startOfDay = new Date();
@@ -114,6 +114,8 @@ const updateConsultation = async (req, res) => {
       prakriti,
       clinicalHistorySummary,
       attentionRequired,
+      condition,
+      followUpDate,
     } = req.body;
 
     if (chiefComplaint !== undefined) {
@@ -133,9 +135,28 @@ const updateConsultation = async (req, res) => {
       consultation.attentionRequired =
         attentionRequired;
     }
-
+    if (condition !== undefined) {
+  consultation.condition = condition;
+}
+if (followUpDate !== undefined) {
+  consultation.followUpDate = followUpDate;
+}
     await consultation.save();
-
+    if (followUpDate) {
+  await Reminder.findOneAndUpdate(
+    { consultation: consultation._id },
+    {
+      patient: consultation.patient,
+      consultation: consultation._id,
+      followUpDate: followUpDate,
+      status: "pending",
+    },
+    {
+      upsert: true,
+      new: true,
+    }
+  );
+}
     res.status(200).json({
       status: "success",
       message: "Consultation updated successfully",

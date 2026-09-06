@@ -1,4 +1,5 @@
 const Patient = require("../models/Patient");
+const Consultation = require("../models/Consultation");
 
 const createPatient = async (req,res)=> {
     try{
@@ -99,9 +100,60 @@ const getPatientById = async (req, res) => {
   }
 };
 
+const getPatientHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find patient using patientId
+    const patient = await Patient.findOne({
+      patientId: id,
+    });
+
+    if (!patient) {
+      return res.status(404).json({
+        status: "error",
+        message: "Patient not found",
+      });
+    }
+
+    // Find all consultations for this patient
+    const consultations = await Consultation.find({
+      patient: patient._id,
+    }).sort({ createdAt: -1 });
+
+    const history = consultations.map((consultation) => ({
+      consultationId: consultation._id,
+      date: consultation.createdAt,
+      chiefComplaint: consultation.chiefComplaint,
+      prakriti: consultation.prakriti,
+      condition: consultation.condition,
+      status: consultation.status,
+      aiHistoryReady: consultation.aiHistoryReady,
+      attentionRequired: consultation.attentionRequired,
+    }));
+
+    res.status(200).json({
+      status: "success",
+      patient: {
+        patientId: patient.patientId,
+        name: patient.name,
+      },
+      count: history.length,
+      history,
+    });
+  } catch (error) {
+    console.error("Patient history error:", error.message);
+
+    res.status(500).json({
+      status: "error",
+      message: "Failed to fetch patient history",
+    });
+  }
+};
 
 module.exports = {
   createPatient,
   getPatients,
   getPatientById,
+  getPatientHistory,
 };

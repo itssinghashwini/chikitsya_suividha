@@ -19,7 +19,15 @@ const consultationSchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
-
+    condition: {
+  type: String,
+  enum: ["same", "better", "worse"],
+  default: null,
+},
+followUpDate: {
+  type: Date,
+  default: null,
+},
     status: {
       type: String,
       enum: [

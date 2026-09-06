@@ -4,6 +4,7 @@ const {
   createPatient,
   getPatients,
   getPatientById,
+  getPatientHistory,
 } = require("../controllers/patientController");
 
 const {
@@ -26,7 +27,7 @@ router.get(
   allowRoles("practitioner", "admin"),
   getPatients
 );
-
+router.get("/:id/history", getPatientHistory);
 router.get(
   "/:id",
   protect,

@@ -5,6 +5,9 @@ const {
   generateClinicalHistory,
 } = require("../services/aiService");
 const validateAiResponse = require("../utils/validateAiResponse");
+const {
+  checkAttentionRequired,
+} = require("../utils/attentionRules");
 // Start a new kiosk session
 const createSession = async (req, res) => {
   try {
@@ -210,14 +213,21 @@ const generateSummary = async (req, res) => {
         details: validation.message,
       });
     }
+    // Check whether the AI summary contains any red-flag symptoms
+const attentionRequired =
+  checkAttentionRequired(aiSummary);
 
-    // Save draft
-    consultation.clinicalHistorySummary =
-      aiSummary;
+// Save AI draft
+consultation.clinicalHistorySummary =
+  aiSummary;
 
-    consultation.aiHistoryReady = true;
+consultation.aiHistoryReady = true;
 
-    await consultation.save();
+// Save attention flag calculated by backend
+consultation.attentionRequired =
+  attentionRequired;
+
+await consultation.save();
 
     res.status(200).json({
       status: "success",

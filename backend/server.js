@@ -6,6 +6,8 @@ const consultationRoutes = require("./routes/consultationRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
 const documentRoutes = require("./routes/documentRoutes");
+const reminderRoutes = require("./routes/reminderRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 require("dotenv").config();
 const connectDB = require("./config/db");
@@ -22,6 +24,8 @@ app.use("/api/consultations",consultationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/sessions", documentRoutes);
+app.use("/api/reminders", reminderRoutes);
+app.use("/api/admin", adminRoutes);
 
 //health check
 app.get("/api/health",(req,res) => {
